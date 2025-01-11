@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tictactoe.ui.theme.TicTacToeTheme
@@ -36,97 +37,149 @@ fun TicTacToeGame() {
     var draw by remember { mutableStateOf(false) }
     var xWins by remember { mutableStateOf(0) }
     var oWins by remember { mutableStateOf(0) }
+    var showCredits by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.DarkGray) // Set dark mode background
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Row(
-            modifier = Modifier.padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    if (showCredits) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.DarkGray),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "X Wins: $xWins",
-                fontSize = 20.sp,
-                color = Color.White,
-                modifier = Modifier.padding(end = 16.dp)
-            )
-            Text(
-                text = "O Wins: $oWins",
-                fontSize = 20.sp,
-                color = Color.White
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Created by Shubham Ojha",
+                    fontSize = 24.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { showCredits = false }) {
+                    Text(text = "Back")
+                }
+            }
         }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.DarkGray) // Set dark mode background
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
 
-        if (winner != null) {
-            Text(
-                text = "$winner wins!",
-                fontSize = 24.sp,
-                color = Color.Green,
-                modifier = Modifier.padding(16.dp)
-            )
-        } else if (draw) {
-            Text(
-                text = "It's a draw!",
-                fontSize = 24.sp,
-                color = Color.Red,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(y = (-160).dp), // Moves the button higher by 16dp without affecting other elements
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(
+                    onClick = { showCredits = true },
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text(text = "Credits")
+                }
+            }
 
-        for (row in 0..2) {
-            Row {
-                for (col in 0..2) {
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .padding(4.dp)
-                            .background(Color.Gray, RoundedCornerShape(8.dp)) // Dark mode tile color
-                            .clickable(enabled = winner == null && !draw) { // Disable input if game is over
-                                if (board[row][col].isEmpty()) {
+            Row(
+                modifier = Modifier.padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "X Wins: $xWins",
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+                Text(
+                    text = "O Wins: $oWins",
+                    fontSize = 20.sp,
+                    color = Color.White
+                )
+            }
+
+            if (winner != null) {
+                Text(
+                    text = "$winner wins!",
+                    fontSize = 24.sp,
+                    color = Color.Green,
+                    modifier = Modifier.padding(16.dp)
+                )
+            } else if (draw) {
+                Text(
+                    text = "It's a draw!",
+                    fontSize = 24.sp,
+                    color = Color.Red,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+
+            for (row in 0..2) {
+                Row {
+                    for (col in 0..2) {
+                        Box(
+                            modifier = Modifier
+                                .size(100.dp)
+                                .padding(4.dp)
+                                .background(Color.Gray, RoundedCornerShape(8.dp))
+                                .clickable(enabled = winner == null && !draw && board[row][col].isEmpty()) {
                                     board[row][col] = currentPlayer
                                     if (checkWinner(board, currentPlayer)) {
                                         winner = currentPlayer
+                                        if (currentPlayer == "X") {
+                                            xWins++
+                                        } else {
+                                            oWins++
+                                        }
                                     } else if (isDraw(board)) {
                                         draw = true
                                     } else {
                                         currentPlayer = if (currentPlayer == "X") "O" else "X"
                                     }
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = board[row][col],
-                            fontSize = 32.sp,
-                            color = Color.White, // Text color for dark mode
-                            textAlign = TextAlign.Center
-                        )
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = board[row][col],
+                                fontSize = 32.sp,
+                                color = Color.White, // Text color for dark mode
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        Button(
-            onClick = {
-                for (r in 0..2) {
-                    for (c in 0..2) {
-                        board[r][c] = ""
+            Button(
+                onClick = {
+                    for (r in 0..2) {
+                        for (c in 0..2) {
+                            board[r][c] = ""
+                        }
                     }
-                }
-                currentPlayer = "X"
-                winner = null
-                draw = false
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text(text = "Reset Game")
+                    currentPlayer = "X"
+                    winner = null
+                    draw = false
+                },
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Text(text = "Reset Game")
+            }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewTicTacToeGame() {
+    TicTacToeTheme {
+        TicTacToeGame()
     }
 }
 
